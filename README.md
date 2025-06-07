@@ -1,2 +1,2 @@
 # url_shortener
-converting long url to short url
+A web-based URL Shortener that lets you upload CSV/XLSX files with long URLs, processes them into short links using Base62 encoding, stores them in MongoDB, and enables downloading the updated file. Built with Flask, Bootstrap, and JavaScript.
