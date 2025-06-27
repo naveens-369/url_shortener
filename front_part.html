@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #6a11cb, #2575fc);
+            font-family: 'Poppins', sans-serif;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 500px;
+            padding: 40px;
+            background: #ffffff;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            color: #333;
+        }
+        h1 {
+            font-weight: bold;
+            color: #2575fc;
+            font-size: 28px;
+        }
+        .btn-success {
+            background: #28a745;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+        .btn-success:hover {
+            background: #218838;
+        }
+        .form-control {
+            border-radius: 5px;
+            padding: 12px;
+            border: 1px solid #ced4da;
+            background: #f8f9fa;
+            color: #495057;
+            font-size: 14px;
+        }
+        .alert {
+            font-size: 14px;
+            font-weight: bold;
+            background: #d1ecf1;
+            color: #0c5460;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="mb-4">🔗 URL Shortener</h1>
+        <form id="uploadForm" enctype="multipart/form-data" class="mb-3">
+            <div class="mb-3">
+                <label for="fileInput" class="form-label">Upload CSV/XLSX file:</label>
+                <input type="file" id="fileInput" class="form-control" accept=".csv, .xlsx" required>
+            </div>
+            <button type="submit" class="btn btn-success">Submit</button>
+        </form>
+
+        <div id="downloadSection" class="alert d-none">
+            <p>✅ File processed successfully! Click below to download:</p>
+            <a id="downloadLink" class="btn btn-primary" href="#" download>Download Processed CSV</a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById("uploadForm");
+        const fileInput = document.getElementById("fileInput");
+        const downloadSection = document.getElementById("downloadSection");
+        const downloadLink = document.getElementById("downloadLink");
+        const submitButton = form.querySelector("button");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+            const file = fileInput.files[0];
+            if (!file) {
+                alert("Please select a file.");
+                return;
+            }
+
+            submitButton.disabled = true;
+            submitButton.textContent = "Uploading...";
+
+            const formData = new FormData();
+            formData.append("file", file);
+            try {
+                const response = await fetch("http://127.0.0.1:5000/upload", { 
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    const errorMessage = await response.text();
+                    throw new Error(`Server error: ${response.status} - ${errorMessage || "Unknown error"}`);
+                }
+
+                const data = await response.json();
+                downloadLink.href = data.fileUrl;
+                downloadSection.classList.remove("d-none");
+            } catch (error) {
+                console.error("Fetch error:", error.message, error.stack); // More detailed logging
+                alert(`Failed to fetch: ${error.message}`);
+            } finally {
+                submitButton.disabled = false;
+                submitButton.textContent = "Submit";
+            }
+        });
+    </script>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
